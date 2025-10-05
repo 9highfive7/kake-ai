@@ -1,0 +1,18 @@
+# Node
+node_modules
+
+
+# Builds
+/dist
+/build
+
+
+# Env
+.env
+.env.*
+
+
+# Misc
+.DS_Store
+.idea
+.vscode
