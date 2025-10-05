@@ -1,43 +1,68 @@
-import React, { useState } from 'react'
+// src/components/ui/tabs.tsx
+import React, { createContext, useContext, useState, ReactNode } from "react";
 
-/** 親は current/setValue を子に伝播。 */
-export function Tabs({ defaultValue, children, className='' }: any) {
-  const [current, setCurrent] = useState(defaultValue)
+type TabsCtx = {
+  value: string;
+  setValue: (v: string) => void;
+};
+
+const Ctx = createContext<TabsCtx | null>(null);
+
+type TabsProps = {
+  defaultValue: string;
+  children: ReactNode;
+  className?: string;
+};
+
+export function Tabs({ defaultValue, children, className }: TabsProps) {
+  const [value, setValue] = useState(defaultValue);
   return (
-    <div className={className} data-current={current}>
-      {React.Children.map(children, (c: any) =>
-        React.isValidElement(c)
-          ? React.cloneElement(c, { current, setValue: setCurrent })
-          : c
-      )}
-    </div>
-  )
+    <Ctx.Provider value={{ value, setValue }}>
+      <div className={className}>{children}</div>
+    </Ctx.Provider>
+  );
 }
 
-/** ← ここがポイント：setValue を子の Trigger に渡す */
-export function TabsList({ children, current, setValue }: any) {
+export function TabsList({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <div className="inline-flex gap-2 rounded-xl bg-slate-200 p-1">
-      {React.Children.map(children, (c: any) =>
-        React.isValidElement(c) ? React.cloneElement(c, { current, setValue }) : c
-      )}
+    <div role="tablist" className={`inline-flex gap-2 p-1 rounded-md bg-slate-100 ${className || ""}`}>
+      {children}
     </div>
-  )
+  );
 }
 
-export function TabsTrigger({ children, value, current, setValue }: any) {
-  const active = current === value
+type TriggerProps = {
+  value: string;
+  children: ReactNode;
+  className?: string;
+};
+
+export function TabsTrigger({ value, children, className }: TriggerProps) {
+  const ctx = useContext(Ctx)!;
+  const active = ctx.value === value;
   return (
     <button
-      className={`px-3 py-1 rounded-lg text-sm ${active ? 'bg-white shadow' : 'text-slate-600'}`}
-      onClick={() => setValue(value)}
+      type="button"
+      role="tab"
+      aria-selected={active}
+      onClick={() => ctx.setValue(value)}
+      className={`px-3 py-1 rounded-md text-sm transition
+        ${active ? "bg-white shadow text-slate-900" : "text-slate-600 hover:bg-white/60"}
+        ${className || ""}`}
     >
       {children}
     </button>
-  )
+  );
 }
 
-export function TabsContent({ children, value, current }: any) {
-  if (current !== value) return null
-  return <div className="mt-4">{children}</div>
+type ContentProps = {
+  value: string;
+  children: ReactNode;
+  className?: string;
+};
+
+export function TabsContent({ value, children, className }: ContentProps) {
+  const ctx = useContext(Ctx)!;
+  if (ctx.value !== value) return null;
+  return <div className={className}>{children}</div>;
 }

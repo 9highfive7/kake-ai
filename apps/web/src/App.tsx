@@ -396,7 +396,7 @@ export default function App() {
   // CSV 書き出し
   function exportCSV() {
     const header = ["id", "date", "payer", "category", "memo", "amount", "kind"].join(",");
-    const rows = txns.map(t => [t.id, t.date, t.payer, t.category, t.memo.replaceAll(",", " "), t.amount, t.kind].join(","));
+    const rows = txns.map(t => [t.id, t.date, t.payer, t.category, (String(t.memo) || "").split(",").join(" "), t.amount, t.kind].join(","));
     const csv = [header, ...rows].join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
